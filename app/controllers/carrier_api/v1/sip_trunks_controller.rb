@@ -36,7 +36,8 @@ module CarrierAPI
 
       def destroy
         sip_trunk = find_sip_trunk
-        DeleteSIPTrunk.call(sip_trunk) if sip_trunk.destroy
+        DeleteSIPTrunk.call(sip_trunk)
+        sip_trunk.destroy!
         respond_with_resource(sip_trunk)
       end
 
