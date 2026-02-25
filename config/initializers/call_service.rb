@@ -8,5 +8,5 @@ CallService.configure do |config|
   config.services_username = Rails.configuration.app_settings.fetch(:services_username)
   config.services_password = Rails.configuration.app_settings.fetch(:services_password, nil)
   config.logger = Rails.logger
-  config.subscriber_realm = "somleng.org"
+  config.subscriber_realm = ENV.fetch("SIP_DOMAIN", "somleng.org")
 end
