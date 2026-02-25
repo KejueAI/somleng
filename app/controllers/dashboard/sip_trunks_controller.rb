@@ -50,7 +50,8 @@ module Dashboard
         :authentication_mode, :name, :region, :max_channels,
         :source_ip_addresses, :country,
         :host, :dial_string_prefix, :national_dialing,
-        :plus_prefix, :route_prefixes, :default_sender
+        :plus_prefix, :route_prefixes, :default_sender,
+        :username, :password, :outbound_proxy, :auth_user
       )
     end
 

@@ -1,4 +1,4 @@
-if Rails.env.development? || Rails.env.test?
+if Rails.env.development? || Rails.env.test? || ENV["STUB_AWS_SERVICES"].present?
   ENV["AWS_DEFAULT_REGION"] ||= "ap-southeast-1"
   ENV["AWS_ACCESS_KEY_ID"] ||= "access-key-id"
   ENV["AWS_SECRET_ACCESS_KEY"] ||= "secret-key"

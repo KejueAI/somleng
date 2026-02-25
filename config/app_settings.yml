@@ -1,7 +1,7 @@
 default: &default
-  app_subdomain: "app"
-  api_subdomain: "api"
-  verify_subdomain: "verify"
+  app_subdomain: <%= ENV.fetch("APP_SUBDOMAIN", "app") %>
+  api_subdomain: <%= ENV.fetch("API_SUBDOMAIN", "api") %>
+  verify_subdomain: <%= ENV.fetch("VERIFY_SUBDOMAIN", "verify") %>
   client_gateway_domain: "sip.somleng.org"
   mailer_sender: <%= ENV.fetch("MAILER_SENDER", "no-reply@somleng.org") %>
   aws_sqs_high_priority_queue_name: <%= ENV.fetch("AWS_SQS_HIGH_PRIORITY_QUEUE_NAME", "high-priority") %>
@@ -50,6 +50,7 @@ production: &production
   call_service_default_host: "<%= ENV.fetch("CALL_SERVICE_DEFAULT_HOST", "https://switch.hydrogen.somleng.org") %>"
   call_service_password: "<%= ENV.fetch('CALL_SERVICE_PASSWORD', nil) %>"
   call_service_queue_url: "<%= ENV.fetch('CALL_SERVICE_QUEUE_URL', nil) %>"
+  services_host: "<%= ENV.fetch('SERVICES_HOST', nil) %>"
   rating_engine_host: <%= ENV.fetch("RATING_ENGINE_HOST", "https://rating-engine.somleng.org") %>
   rating_engine_username: <%= ENV.fetch("RATING_ENGINE_USERNAME", "cgrates") %>
   rating_engine_password: <%= ENV.fetch("RATING_ENGINE_PASSWORD", nil) %>
@@ -87,6 +88,7 @@ development: &development
   call_service_default_host: <%= ENV.fetch('CALL_SERVICE_DEFAULT_HOST', 'http://localhost:8080') %>
   call_service_password: "<%= ENV.fetch('CALL_SERVICE_PASSWORD', 'password') %>"
   call_service_queue_url: "<%= ENV.fetch('CALL_SERVICE_QUEUE_URL', 'https://amazonaws.com/12345/call_service_queue') %>"
+  services_host: "<%= ENV.fetch('SERVICES_HOST', nil) %>"
   admin_password: "<%= ENV.fetch('ADMIN_PASSWORD', 'password') %>"
   services_password: "<%= ENV.fetch('SERVICES_PASSWORD', 'password') %>"
   active_job_queue_adapter: "<%= ENV.fetch('ACTIVE_JOB_QUEUE_ADAPTER', 'async') %>"

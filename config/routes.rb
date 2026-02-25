@@ -42,21 +42,27 @@ Rails.application.routes.draw do
         namespace :phone_numbers do
           resources :stats, only: :index
         end
+        resources :sip_trunks, only: %i[index create show update destroy]
         resources :phone_numbers, only: %i[index create show update destroy]
       end
     end
 
-    namespace :services do
-      resources :inbound_phone_calls, only: :create
-      resources :outbound_phone_calls, only: :create
-      resources :phone_call_events, only: :create
-      resources :tts_events, only: :create
-      resources :call_data_records, only: :create
-      resources :recordings, only: %i[create update]
-      resources :media_streams, only: :create
-      resources :media_stream_events, only: :create
-      resources :call_service_capacities, only: :create
-    end
+  end
+
+  # Internal service-to-service routes (Switch, FreeSWITCH CDR, etc.)
+  # These are outside the subdomain constraint so K8s internal services
+  # can reach them via cluster DNS (e.g., chorus-api.chorus.svc.cluster.local).
+  # Authentication is enforced by ServicesController (HTTP Basic Auth).
+  namespace :services, defaults: { format: "json" } do
+    resources :inbound_phone_calls, only: :create
+    resources :outbound_phone_calls, only: :create
+    resources :phone_call_events, only: :create
+    resources :tts_events, only: :create
+    resources :call_data_records, only: :create
+    resources :recordings, only: %i[create update]
+    resources :media_streams, only: :create
+    resources :media_stream_events, only: :create
+    resources :call_service_capacities, only: :create
   end
 
   scope(

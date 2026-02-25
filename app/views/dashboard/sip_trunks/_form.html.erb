@@ -57,12 +57,38 @@
       </div>
     </div>
 
+    <div class="card mb-3" data-sip-trunks-target="outboundRegistrationSection">
+      <div class="card-body">
+        <h5 class="card-title">Registration Credentials</h5>
+
+        <div class="row">
+          <div class="col-sm-6">
+            <%= f.input :username, placeholder: "sip_username", hint: "The SIP username for registering with the remote PBX" %>
+          </div>
+
+          <div class="col-sm-6">
+            <%= f.input :password, as: :string, placeholder: "sip_password", hint: "The SIP password for registering with the remote PBX" %>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-6">
+            <%= f.input :auth_user, placeholder: "auth_username", hint: "The authentication username, if different from the SIP username. Most often unset." %>
+          </div>
+
+          <div class="col-sm-6">
+            <%= f.input :outbound_proxy, placeholder: "proxy.example.com:5060", hint: "A proxy used to reach your SIP server for registration. Most often unset." %>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="card mb-3">
       <div class="card-body">
         <h5 class="card-title">Inbound Dialing</h5>
 
         <div class="row">
-          <div class="col-sm-6" data-sip-trunks-target="ipAddressAuthenticationSection">
+          <div class="col-sm-6" data-sip-trunks-target="sourceIpSection">
             <%= f.input(
                 :source_ip_addresses,
                 as: :text,

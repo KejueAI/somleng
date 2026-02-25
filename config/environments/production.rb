@@ -18,7 +18,7 @@ Rails.application.configure do
 
   # Ensures that a master key has been made available in ENV["RAILS_MASTER_KEY"], config/master.key, or an environment
   # key such as config/credentials/production.key. This key is used to decrypt credentials (and other encrypted files).
-  config.require_master_key = true
+  config.require_master_key = ENV["RAILS_MASTER_KEY"].present? || File.exist?(Rails.root.join("config/master.key"))
 
   # Enable static file serving from the `/public` folder (turn off if using NGINX/Apache for it).
   config.public_file_server.enabled = true
@@ -36,8 +36,8 @@ Rails.application.configure do
   # config.action_dispatch.x_sendfile_header = "X-Sendfile" # for Apache
   # config.action_dispatch.x_sendfile_header = "X-Accel-Redirect" # for NGINX
 
-  # Store uploaded files on the local file system (see config/storage.yml for options).
-  config.active_storage.service = :amazon
+  # Store uploaded files — use S3 by default, local disk for on-prem.
+  config.active_storage.service = ENV.fetch("ACTIVE_STORAGE_SERVICE", "amazon").to_sym
 
   # Mount Action Cable outside main process or domain.
   # config.action_cable.mount_path = nil
@@ -52,7 +52,7 @@ Rails.application.configure do
   config.assume_ssl = true
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  config.force_ssl = true
+  config.force_ssl = ENV.fetch("FORCE_SSL", "true") == "true"
   # Skip http-to-https redirect for the default health check endpoint.
   config.ssl_options = { redirect: { exclude: ->(request) { request.path =~ /health_checks/ } } }
 
@@ -74,10 +74,9 @@ Rails.application.configure do
   # Use a different cache store in production.
   # config.cache_store = :mem_cache_store
 
-  # Use a real queuing backend for Active Job (and separate queues per environment).
-  # config.active_job.queue_adapter = :resque
-  # config.active_job.queue_name_prefix = "somleng_production"
-  config.active_job.queue_adapter = :shoryuken
+  # Use a real queuing backend for Active Job.
+  # Supports: "shoryuken" (SQS, default), "good_job" (Postgres), "async" (in-process), "inline" (synchronous)
+  config.active_job.queue_adapter = ENV.fetch("ACTIVE_JOB_QUEUE_ADAPTER", "shoryuken").to_sym
   # Explicity set this value as otherwise ActiveJob will call queue_adapter.enqueue_after_transaction_commit?
   # which Shoruken doesn't define
   config.active_job.enqueue_after_transaction_commit = :never
@@ -117,8 +116,12 @@ Rails.application.configure do
 
   config.action_mailer.default_url_options[:protocol] = "https"
 
-  config.action_mailer.delivery_method = :ses_v2
-  config.action_mailer.ses_v2_settings = { region: Rails.configuration.app_settings.fetch(:aws_ses_region) }
+  if ENV["STUB_AWS_SERVICES"].present?
+    config.action_mailer.delivery_method = :test
+  else
+    config.action_mailer.delivery_method = :ses_v2
+    config.action_mailer.ses_v2_settings = { region: Rails.configuration.app_settings.fetch(:aws_ses_region) }
+  end
   config.action_mailer.deliver_later_queue_name = config.active_job.default_queue_name
 
   config.skylight.probes << "active_job"

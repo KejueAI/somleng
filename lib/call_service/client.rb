@@ -2,7 +2,7 @@ require "digest"
 
 module CallService
   class Client
-    attr_reader :default_host, :default_region, :username, :password, :queue_url, :subscriber_realm, :http_client, :sqs_client
+    attr_reader :default_host, :default_region, :username, :password, :queue_url, :services_host, :subscriber_realm, :http_client, :sqs_client
 
     def initialize(**options)
       @default_host = options.fetch(:default_host) { CallService.configuration.default_host }
@@ -10,6 +10,7 @@ module CallService
       @username = options.fetch(:username) { CallService.configuration.username }
       @password = options.fetch(:password) { CallService.configuration.password }
       @queue_url = options.fetch(:queue_url) { CallService.configuration.queue_url }
+      @services_host = options.fetch(:services_host) { CallService.configuration.services_host }
       @subscriber_realm = options.fetch(:subscriber_realm) { CallService.configuration.subscriber_realm }
       @http_client = options.fetch(:http_client) { default_http_client }
       @sqs_client = options.fetch(:sqs_client) { Aws::SQS::Client.new }
@@ -85,13 +86,35 @@ module CallService
     end
 
     def enqueue_job(job_class, *args)
-      sqs_client.send_message(
-        queue_url:,
-        message_body: {
-          job_class:,
-          job_args: args
-        }.to_json
-      )
+      if queue_url.present?
+        sqs_client.send_message(
+          queue_url:,
+          message_body: {
+            job_class:,
+            job_args: args
+          }.to_json
+        )
+      elsif services_host.present?
+        services_http_client.post("#{services_host}/jobs") do |req|
+          req.body = { job_class:, job_args: args }.to_json
+        end
+      else
+        raise "Cannot enqueue #{job_class}: neither CALL_SERVICE_QUEUE_URL nor SERVICES_HOST is configured"
+      end
+    end
+
+    def services_http_client
+      @services_http_client ||= Faraday.new do |conn|
+        conn.headers["Accept"] = "application/json"
+        conn.headers["Content-Type"] = "application/json"
+        conn.adapter Faraday.default_adapter
+        conn.request(
+          :authorization,
+          :basic,
+          CallService.configuration.services_username,
+          CallService.configuration.services_password
+        )
+      end
     end
   end
 end

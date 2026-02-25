@@ -5,6 +5,8 @@ export default class extends Controller {
     "authenticationModeInput",
     "countrySelectInput",
     "ipAddressAuthenticationSection",
+    "outboundRegistrationSection",
+    "sourceIpSection",
     "regionInput",
     "regionHint",
   ];
@@ -27,10 +29,34 @@ export default class extends Controller {
       this.ipAddressAuthenticationSectionTargets.forEach(
         (target) => (target.style.display = "none")
       );
+      this.outboundRegistrationSectionTargets.forEach(
+        (target) => (target.style.display = "none")
+      );
+      this.sourceIpSectionTargets.forEach(
+        (target) => (target.style.display = "none")
+      );
+    } else if (element.value == "outbound_registration") {
+      this.countrySelectInputTarget.value =
+        this.countrySelectInputTarget.dataset.selectedCountry;
+      this.ipAddressAuthenticationSectionTargets.forEach(
+        (target) => (target.style.display = "none")
+      );
+      this.outboundRegistrationSectionTargets.forEach(
+        (target) => (target.style.display = "block")
+      );
+      this.sourceIpSectionTargets.forEach(
+        (target) => (target.style.display = "block")
+      );
     } else {
       this.countrySelectInputTarget.value =
         this.countrySelectInputTarget.dataset.selectedCountry;
       this.ipAddressAuthenticationSectionTargets.forEach(
+        (target) => (target.style.display = "block")
+      );
+      this.outboundRegistrationSectionTargets.forEach(
+        (target) => (target.style.display = "none")
+      );
+      this.sourceIpSectionTargets.forEach(
         (target) => (target.style.display = "block")
       );
     }

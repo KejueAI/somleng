@@ -14,11 +14,16 @@ module Services
       required(:host).filled(:str?)
       required(:region).filled(:str?, included_in?: SomlengRegion::Region.all.map(&:alias))
       optional(:client_identifier).maybe(:str?)
+      optional(:gateway_id).maybe(:str?)
       optional(:variables).maybe(:hash)
     end
 
     rule(:client_identifier, :source_ip, :to) do |context:|
-      if values[:client_identifier].present?
+      if values[:gateway_id].present?
+        # Inbound call arrived through a registered gateway — look up trunk by ID directly
+        context[:sip_trunk] = SIPTrunk.find_by(id: values[:gateway_id])
+        source_identity = values[:gateway_id]
+      elsif values[:client_identifier].present?
         source_identity = values.fetch(:client_identifier)
         context[:sip_trunk] = SIPTrunk.find_by(username: source_identity)
       else
@@ -50,12 +55,13 @@ module Services
     rule(:from) do |context:|
       next if context[:sip_trunk].blank?
 
-      context[:from] = context.fetch(:sip_trunk).normalize_number(value)
-      unless phone_number_validator.valid?(context[:from])
-        key.failure(
-          "is invalid. It must be an E.164 formatted phone number and must include the country code"
-        )
-        error_log_messages << "From #{context[:from]} is invalid. It must be an E.164 formatted phone number and must include the country code"
+      normalized = context.fetch(:sip_trunk).normalize_number(value)
+      if phone_number_validator.valid?(normalized)
+        context[:from] = normalized
+      else
+        # For gateway-originated calls, accept the raw caller ID as-is
+        # (PBX extensions like "6703" aren't E.164 but are valid caller IDs)
+        context[:from] = value
       end
     end
 

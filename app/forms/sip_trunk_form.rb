@@ -26,6 +26,11 @@ class SIPTrunkForm
   attribute :national_dialing, :boolean, default: false
   attribute :plus_prefix, :boolean, default: false
 
+  attribute :username
+  attribute :password
+  attribute :outbound_proxy
+  attribute :auth_user
+
   enumerize :authentication_mode, in: SIPTrunk.authentication_mode.values
 
   validates :name, :region, presence: true
@@ -33,6 +38,7 @@ class SIPTrunkForm
   validates :authentication_mode, presence: true
   validates :country, inclusion: { in: COUNTRIES }, allow_blank: true
   validates :dial_string_prefix, format: DIAL_STRING_PREFIX_FORMAT, allow_blank: true
+  validates :username, :password, :host, presence: true, if: -> { authentication_mode&.outbound_registration? }
 
   validate :validate_source_ip_addresses
 
@@ -58,6 +64,10 @@ class SIPTrunkForm
       plus_prefix: sip_trunk.outbound_plus_prefix,
       route_prefixes: sip_trunk.outbound_route_prefixes,
       default_sender: sip_trunk.default_sender,
+      username: sip_trunk.username,
+      password: sip_trunk.password,
+      outbound_proxy: sip_trunk.outbound_proxy,
+      auth_user: sip_trunk.auth_user,
     )
   end
 
@@ -67,9 +77,11 @@ class SIPTrunkForm
     if authentication_mode.client_credentials?
       self.source_ip_addresses = nil
       self.host = nil
+      self.username = nil
+      self.password = nil
     end
 
-    sip_trunk.attributes = {
+    attrs = {
       carrier:,
       authentication_mode:,
       name:,
@@ -84,6 +96,15 @@ class SIPTrunkForm
       outbound_route_prefixes: route_prefixes,
       default_sender:
     }
+
+    if authentication_mode.outbound_registration?
+      attrs[:username] = username
+      attrs[:password] = password
+      attrs[:outbound_proxy] = outbound_proxy.to_s.strip.presence
+      attrs[:auth_user] = auth_user.to_s.strip.presence || username
+    end
+
+    sip_trunk.attributes = attrs
 
     sip_trunk.save!
   end
@@ -101,4 +122,5 @@ class SIPTrunkForm
       return errors.add(:source_ip_addresses, :invalid) unless Resolv::IPv4::Regex.match?(ip)
     end
   end
+
 end
