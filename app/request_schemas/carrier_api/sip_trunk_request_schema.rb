@@ -18,6 +18,7 @@ module CarrierAPI
           optional(:outbound_host).filled(:str?)
           optional(:outbound_proxy).maybe(:str?)
           optional(:auth_user).maybe(:str?)
+          optional(:register_transport).filled(:str?, included_in?: %w[udp tcp tls])
           optional(:outbound_dial_string_prefix).filled(:str?)
           optional(:outbound_national_dialing).filled(:bool?)
           optional(:outbound_plus_prefix).filled(:bool?)
@@ -79,6 +80,7 @@ module CarrierAPI
       result[:outbound_proxy] = params.fetch(:outbound_proxy) if params.key?(:outbound_proxy)
       if params.fetch(:authentication_mode) == "outbound_registration"
         result[:auth_user] = params.key?(:auth_user) && params[:auth_user].present? ? params[:auth_user] : params[:username]
+        result[:register_transport] = params.fetch(:register_transport, "udp")
       end
       result[:outbound_dial_string_prefix] = params.fetch(:outbound_dial_string_prefix) if params.key?(:outbound_dial_string_prefix)
       result[:outbound_national_dialing] = params.fetch(:outbound_national_dialing) if params.key?(:outbound_national_dialing)

@@ -2,6 +2,7 @@ Rails.application.config.to_prepare do
   SIPTrunk.class_eval do
     # Extend the authentication_mode enum to include outbound_registration
     enumerize :authentication_mode, in: %i[ip_address client_credentials outbound_registration], override: true
+    enumerize :register_transport, in: %i[udp tcp tls], default: :udp
 
     private
 

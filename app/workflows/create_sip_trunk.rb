@@ -50,6 +50,7 @@ class CreateSIPTrunk < ApplicationWorkflow
         outbound_proxy: network_proxy
       }
       body[:auth_username] = sip_trunk.auth_user if sip_trunk.auth_user.present?
+      body[:register_transport] = sip_trunk.register_transport || "udp"
       req.body = body.to_json
     end
   end

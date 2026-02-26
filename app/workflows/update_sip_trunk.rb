@@ -42,7 +42,7 @@ class UpdateSIPTrunk < ApplicationWorkflow
   end
 
   def gateway_params_changed?
-    %i[username password outbound_host outbound_proxy auth_user].any? { |attr| attribute_changed?(attr) }
+    %i[username password outbound_host outbound_proxy auth_user register_transport].any? { |attr| attribute_changed?(attr) }
   end
 
   def recreate_gateway
@@ -74,6 +74,7 @@ class UpdateSIPTrunk < ApplicationWorkflow
         outbound_proxy: network_proxy
       }
       body[:auth_username] = sip_trunk.auth_user if sip_trunk.auth_user.present?
+      body[:register_transport] = sip_trunk.register_transport || "udp"
       req.body = body.to_json
     end
   end

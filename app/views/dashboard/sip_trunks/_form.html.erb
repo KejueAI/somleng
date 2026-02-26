@@ -80,6 +80,12 @@
             <%= f.input :outbound_proxy, placeholder: "proxy.example.com:5060", hint: "A proxy used to reach your SIP server for registration. Most often unset." %>
           </div>
         </div>
+
+        <div class="row">
+          <div class="col-sm-6">
+            <%= f.input :register_transport, as: :select, collection: %w[udp tcp tls], include_blank: false, selected: resource.register_transport || "udp", hint: "The transport protocol used for SIP registration. Use UDP (default), TCP, or TLS depending on what your PBX requires." %>
+          </div>
+        </div>
       </div>
     </div>
 

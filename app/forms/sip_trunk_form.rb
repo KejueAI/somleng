@@ -30,6 +30,7 @@ class SIPTrunkForm
   attribute :password
   attribute :outbound_proxy
   attribute :auth_user
+  attribute :register_transport
 
   enumerize :authentication_mode, in: SIPTrunk.authentication_mode.values
 
@@ -68,6 +69,7 @@ class SIPTrunkForm
       password: sip_trunk.password,
       outbound_proxy: sip_trunk.outbound_proxy,
       auth_user: sip_trunk.auth_user,
+      register_transport: sip_trunk.register_transport,
     )
   end
 
@@ -102,6 +104,7 @@ class SIPTrunkForm
       attrs[:password] = password
       attrs[:outbound_proxy] = outbound_proxy.to_s.strip.presence
       attrs[:auth_user] = auth_user.to_s.strip.presence || username
+      attrs[:register_transport] = register_transport.presence || "udp"
     end
 
     sip_trunk.attributes = attrs
