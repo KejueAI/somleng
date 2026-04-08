@@ -27,6 +27,10 @@ module TwilioAPI
           "Direction" => nil,
           "CallDuration" => nil,
           "SipResponseCode" => nil,
+          "HangupCause" => nil,
+          "SipInviteFailureStatus" => nil,
+          "SipInviteFailurePhrase" => nil,
+          "SipTrace" => nil,
           "CallbackSource" => nil,
           "Timestamp" => nil,
           "SequenceNumber" => nil
@@ -67,6 +71,22 @@ module TwilioAPI
 
       def SipResponseCode
         object.call_data_record.sip_term_status
+      end
+
+      def HangupCause
+        object.call_data_record.hangup_cause
+      end
+
+      def SipInviteFailureStatus
+        object.call_data_record.sip_invite_failure_status
+      end
+
+      def SipInviteFailurePhrase
+        object.call_data_record.sip_invite_failure_phrase
+      end
+
+      def SipTrace
+        SipTraceService.fetch_for_call(object)
       end
 
       def CallbackSource
